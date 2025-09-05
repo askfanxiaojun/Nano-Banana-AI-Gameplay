@@ -67,7 +67,7 @@ async function callGeminiWithRetry(imagePart: object, textPart: object): Promise
         try {
             return await ai.models.generateContent({
                 model: 'gemini-2.5-flash-image-preview',
-                contents: { parts: [imagePart, textPart] },
+                contents: [imagePart, textPart],
                 config: {
                     responseModalities: [Modality.IMAGE, Modality.TEXT],
                 },

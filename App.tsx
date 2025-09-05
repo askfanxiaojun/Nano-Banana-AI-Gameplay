@@ -10,6 +10,8 @@ import { createAlbumPage } from './lib/albumUtils';
 import Footer from './components/Footer';
 
 const DECADES = ['1950s', '1960s', '1970s', '1980s', '1990s', '2000s'];
+const MAGAZINES = ['TIME', 'Vogue', 'National Geographic', 'FORTUNE', 'The Economist', 'Forbes'];
+
 
 // --- Mode Definitions ---
 interface Mode {
@@ -19,6 +21,8 @@ interface Mode {
   type: 'multi-image' | 'single-image';
   prompt?: string; // For single-image modes
   prompts?: Record<string, string>; // For multi-image modes
+  albumTitle?: string; // For multi-image album download
+  albumSubtitle?: string; // For multi-image album download
   previewClass: string; // Tailwind class for the card's background
   previewImage: string;
 }
@@ -33,8 +37,24 @@ const MODES: Mode[] = [
             acc[decade] = `请将照片中的人物重塑为${decade}的风格。这包括那个年代的服装、发型、照片质感和整体美学。输出的图片必须是清晰、逼真的照片。`;
             return acc;
         }, {} as Record<string, string>),
+        albumTitle: 'KAPI ACTION',
+        albumSubtitle: '穿越时空的拍立得',
         previewClass: 'bg-gradient-to-br from-purple-500 to-indigo-600',
         previewImage: 'https://pic1.imgdb.cn/item/68bab34258cb8da5c880bda7.png',
+    },
+    {
+        id: 'creative-magazine',
+        title: '创意杂志风格',
+        description: '生成六种不同风格的杂志封面。',
+        type: 'multi-image',
+        prompts: MAGAZINES.reduce((acc, magazine) => {
+            acc[magazine] = `将图片修改为「${magazine}」杂志风格海报。要有中国式复古风格，高清质感。文字内容更大更突出，加强对比。文字只能为英文，不能出现中文。可以适当改变人物动作，增强画面张力，镜头拉近突出面部和衣物质感。`;
+            return acc;
+        }, {} as Record<string, string>),
+        albumTitle: 'MAGAZINE STYLE',
+        albumSubtitle: '创意杂志封面',
+        previewClass: 'bg-gradient-to-br from-red-600 to-slate-900',
+        previewImage: 'https://pic1.imgdb.cn/item/68bacb0158cb8da5c880dbbb.png',
     },
     {
         id: 'portrait-art',
@@ -80,6 +100,24 @@ const MODES: Mode[] = [
         prompt: `根据上传的图片中的人物主体生成图片：画面以纯黑为背景，采用侧面构图，用艺术感与神秘感兼具的风格，展现出人物形象的剪影。头发在侧前方光线的照射下，发丝隐隐约约。人物姿态安静，微微低头，脸部线条柔和流畅。画质细腻，呈现高对比度效果，画面色彩只有黑色背景和暖色调的剪影部分。侧前方的光线形成鲜明的明暗对比，塑造出立体的轮廓，镜头以平视角度与人物保持一定距离，捕捉这一剪影形象，带来沉静而引人遐想的视觉感受。`,
         previewClass: 'bg-gradient-to-br from-neutral-900 to-amber-500',
         previewImage: 'https://pic1.imgdb.cn/item/68bab42f58cb8da5c880c6b8.png',
+    },
+    {
+        id: 'poster-selfie',
+        title: '和自己的大屏合影',
+        description: '生成一张你和自己复古海报的合影。',
+        type: 'single-image',
+        prompt: `识别输入照片中的人物，并根据其外观创建一张复古风格的海报，将其贴在墙上。不要改变人物在输入照片中的姿势；而是将他们站立或坐在海报旁边，看起来像是用海报拍照。海报应带有强烈的怀旧氛围，包含胶片颗粒、微妙的暗角效果和磨损的纸张纹理。海报中的人物应显示为侧面或正面，部分被抽象几何形状覆盖，以增加现代拼贴美学。海报的标题应使用粗体衬线或无衬线字体，以不规则或略微偏移的布局排列。为增强真实感，可包含小图形细节，如点状元素、手绘笔触或粗糙的笔触痕迹。与海报合影的人物应保持与输入照片相同的姿势和构图，不改变其面部特征或表情。墙壁上还应展示其他著名电影海报。`,
+        previewClass: 'bg-gradient-to-br from-slate-800 to-amber-600',
+        previewImage: 'https://pic1.imgdb.cn/item/68bab97a58cb8da5c880d305.png',
+    },
+    {
+        id: 'showa-idol',
+        title: '昭和时代写真画报',
+        description: '变身为昭和时代的杂志封面偶像。',
+        type: 'single-image',
+        prompt: `识别图中的人物，根据人物生成图片，风格按照昭和时代日本杂志封面风格，复古铜版画偶像摄影，人物需要穿着彩色服装，俏皮怀旧的气氛，1970 年代 1980 年代复古胶片色调，柔和光线，略微过曝，复古照片纹理，印刷杂志布局，日文，可爱道具，花朵，玩具，欢快温暖`,
+        previewClass: 'bg-gradient-to-br from-pink-300 to-sky-400',
+        previewImage: 'https://pic1.imgdb.cn/item/68bab99b58cb8da5c880d311.png',
     }
 ];
 
@@ -160,39 +198,39 @@ function App() {
                 console.error(`Failed to generate image for ${selectedMode.title}:`, err);
             }
         } else if (selectedMode.type === 'multi-image' && selectedMode.prompts) {
-            const decades = Object.keys(selectedMode.prompts);
+            const imageKeys = Object.keys(selectedMode.prompts);
             const initialImages: Record<string, GeneratedImage> = {};
-            decades.forEach(decade => {
-                initialImages[decade] = { status: 'pending' };
+            imageKeys.forEach(key => {
+                initialImages[key] = { status: 'pending' };
             });
             setGeneratedImages(initialImages);
     
             const concurrencyLimit = 2;
-            const decadesQueue = [...decades];
+            const keysQueue = [...imageKeys];
     
-            const processDecade = async (decade: string) => {
+            const processKey = async (key: string) => {
                 try {
-                    const prompt = selectedMode.prompts![decade];
+                    const prompt = selectedMode.prompts![key];
                     const resultUrl = await generateDecadeImage(uploadedImage, prompt);
                     setGeneratedImages(prev => ({
                         ...prev,
-                        [decade]: { status: 'done', url: resultUrl },
+                        [key]: { status: 'done', url: resultUrl },
                     }));
                 } catch (err) {
                     const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
                     setGeneratedImages(prev => ({
                         ...prev,
-                        [decade]: { status: 'error', error: errorMessage },
+                        [key]: { status: 'error', error: errorMessage },
                     }));
-                    console.error(`Failed to generate image for ${decade}:`, err);
+                    console.error(`Failed to generate image for ${key}:`, err);
                 }
             };
     
             const workers = Array(concurrencyLimit).fill(null).map(async () => {
-                while (decadesQueue.length > 0) {
-                    const decade = decadesQueue.shift();
-                    if (decade) {
-                        await processDecade(decade);
+                while (keysQueue.length > 0) {
+                    const key = keysQueue.shift();
+                    if (key) {
+                        await processKey(key);
                     }
                 }
             });
@@ -253,23 +291,30 @@ function App() {
     };
 
     const handleDownloadAlbum = async () => {
+        if (!selectedMode?.prompts) return;
         setIsDownloading(true);
         try {
             const imageData = Object.entries(generatedImages)
                 .filter(([, image]) => image.status === 'done' && image.url)
-                .reduce((acc, [decade, image]) => {
-                    acc[decade] = image!.url!;
+                .reduce((acc, [key, image]) => {
+                    acc[key] = image!.url!;
                     return acc;
                 }, {} as Record<string, string>);
 
-            if (Object.keys(imageData).length < DECADES.length) {
+            if (Object.keys(imageData).length < Object.keys(selectedMode.prompts).length) {
                 alert("请等待所有图片生成完毕后再下载相册。");
+                setIsDownloading(false);
                 return;
             }
-            const albumDataUrl = await createAlbumPage(imageData);
+            const albumDataUrl = await createAlbumPage(
+                imageData,
+                selectedMode.albumTitle || 'My Album',
+                selectedMode.albumSubtitle || 'Creative Generations'
+            );
+            // Fix: Declare the 'link' const for downloading the album.
             const link = document.createElement('a');
             link.href = albumDataUrl;
-            link.download = 'past-forward-album.jpg';
+            link.download = 'creative-album.jpg';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -352,37 +397,37 @@ function App() {
 
             case 'generating':
             case 'results':
-                const imageKeys = Object.keys(generatedImages);
+                const singleImageKey = selectedMode ? selectedMode.id : '';
+                const multiImageKeys = selectedMode?.prompts ? Object.keys(selectedMode.prompts) : [];
+                
                 return (
                     <>
                         {selectedMode?.type === 'single-image' && (
                             <div className="flex justify-center items-center flex-1 w-full">
-                                {imageKeys.map(key => (
-                                    <PolaroidCard
-                                        key={key}
-                                        caption={selectedMode.title}
-                                        status={generatedImages[key].status}
-                                        imageUrl={generatedImages[key].url}
-                                        error={generatedImages[key].error}
-                                        onShake={() => handleRegenerate(key)}
-                                        onDownload={() => handleDownloadIndividualImage(key)}
-                                        isMobile={isMobile}
-                                    />
-                                ))}
+                                <PolaroidCard
+                                    key={singleImageKey}
+                                    caption={selectedMode.title}
+                                    status={generatedImages[singleImageKey]?.status || 'pending'}
+                                    imageUrl={generatedImages[singleImageKey]?.url}
+                                    error={generatedImages[singleImageKey]?.error}
+                                    onShake={() => handleRegenerate(singleImageKey)}
+                                    onDownload={() => handleDownloadIndividualImage(singleImageKey)}
+                                    isMobile={isMobile}
+                                />
                             </div>
                         )}
                         {selectedMode?.type === 'multi-image' && (
                              isMobile ? (
                                 <div className="w-full max-w-sm flex-1 overflow-y-auto mt-4 space-y-8 p-4">
-                                    {DECADES.map((decade) => (
-                                        <div key={decade} className="flex justify-center">
+                                    {multiImageKeys.map((key) => (
+                                        <div key={key} className="flex justify-center">
                                             <PolaroidCard
-                                                caption={decade}
-                                                status={generatedImages[decade]?.status || 'pending'}
-                                                imageUrl={generatedImages[decade]?.url}
-                                                error={generatedImages[decade]?.error}
-                                                onShake={() => handleRegenerate(decade)}
-                                                onDownload={() => handleDownloadIndividualImage(decade)}
+                                                caption={key}
+                                                status={generatedImages[key]?.status || 'pending'}
+                                                imageUrl={generatedImages[key]?.url}
+                                                error={generatedImages[key]?.error}
+                                                onShake={() => handleRegenerate(key)}
+                                                onDownload={() => handleDownloadIndividualImage(key)}
                                                 isMobile={isMobile}
                                             />
                                         </div>
@@ -390,11 +435,11 @@ function App() {
                                 </div>
                             ) : (
                                 <div ref={dragAreaRef} className="relative w-full max-w-5xl h-[600px] mt-4">
-                                    {DECADES.map((decade, index) => {
-                                        const { top, left, rotate } = POSITIONS[index];
+                                    {multiImageKeys.map((key, index) => {
+                                        const { top, left, rotate } = POSITIONS[index % POSITIONS.length];
                                         return (
                                             <motion.div
-                                                key={decade}
+                                                key={key}
                                                 className="absolute cursor-grab active:cursor-grabbing"
                                                 style={{ top, left }}
                                                 initial={{ opacity: 0, scale: 0.5, y: 100, rotate: 0 }}
@@ -403,12 +448,12 @@ function App() {
                                             >
                                                 <PolaroidCard
                                                     dragConstraintsRef={dragAreaRef}
-                                                    caption={decade}
-                                                    status={generatedImages[decade]?.status || 'pending'}
-                                                    imageUrl={generatedImages[decade]?.url}
-                                                    error={generatedImages[decade]?.error}
-                                                    onShake={() => handleRegenerate(decade)}
-                                                    onDownload={() => handleDownloadIndividualImage(decade)}
+                                                    caption={key}
+                                                    status={generatedImages[key]?.status || 'pending'}
+                                                    imageUrl={generatedImages[key]?.url}
+                                                    error={generatedImages[key]?.error}
+                                                    onShake={() => handleRegenerate(key)}
+                                                    onDownload={() => handleDownloadIndividualImage(key)}
                                                     isMobile={isMobile}
                                                 />
                                             </motion.div>

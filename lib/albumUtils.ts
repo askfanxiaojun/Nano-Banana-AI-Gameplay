@@ -15,11 +15,17 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 /**
- * Creates a single "photo album" page image from a collection of decade images.
- * @param imageData A record mapping decade strings to their image data URLs.
+ * Creates a single "photo album" page image from a collection of images.
+ * @param imageData A record mapping keys (like decades or magazine names) to their image data URLs.
+ * @param title The main title for the album page.
+ * @param subtitle The subtitle for the album page.
  * @returns A promise that resolves to a data URL of the generated album page (JPEG format).
  */
-export async function createAlbumPage(imageData: Record<string, string>): Promise<string> {
+export async function createAlbumPage(
+    imageData: Record<string, string>,
+    title: string,
+    subtitle: string
+): Promise<string> {
     const canvas = document.createElement('canvas');
     // High-resolution canvas for good quality (A4-like ratio)
     const canvasWidth = 2480;
@@ -39,7 +45,7 @@ export async function createAlbumPage(imageData: Record<string, string>): Promis
     // 2. Draw the titles
     ctx.textAlign = 'center';
 
-    // Main Title: "KAPI ACTION" with gradient
+    // Main Title: with gradient
     const mainTitleY = 220;
     // Create a retro gradient for the main title
     const mainTitleGradient = ctx.createLinearGradient(canvasWidth * 0.25, 0, canvasWidth * 0.75, 0);
@@ -48,22 +54,22 @@ export async function createAlbumPage(imageData: Record<string, string>): Promis
     mainTitleGradient.addColorStop(1, '#fc913a'); // Retro Orange
     ctx.fillStyle = mainTitleGradient;
     ctx.font = `160px 'Permanent Marker', cursive`;
-    ctx.fillText('KAPI ACTION', canvasWidth / 2, mainTitleY);
+    ctx.fillText(title, canvasWidth / 2, mainTitleY);
 
-    // Subtitle: "穿越时空的拍立得"
+    // Subtitle
     ctx.font = `70px 'Caveat', cursive`;
     ctx.fillStyle = '#e0e0e0'; // Light gray for subtitle
-    ctx.fillText('穿越时空的拍立得', canvasWidth / 2, mainTitleY + 100);
+    ctx.fillText(subtitle, canvasWidth / 2, mainTitleY + 100);
 
 
     // 3. Load all the polaroid images concurrently
-    const decades = Object.keys(imageData);
+    const keys = Object.keys(imageData);
     const loadedImages = await Promise.all(
         Object.values(imageData).map(url => loadImage(url))
     );
 
-    const imagesWithDecades = decades.map((decade, index) => ({
-        decade,
+    const imagesWithKeys = keys.map((key, index) => ({
+        key,
         img: loadedImages[index],
     }));
 
@@ -91,10 +97,10 @@ export async function createAlbumPage(imageData: Record<string, string>): Promis
     const imageContainerHeight = imageContainerWidth; // Classic square-ish photo area
 
     // Reverse the drawing order: draw bottom rows first so top rows are rendered on top
-    const reversedImages = [...imagesWithDecades].reverse();
-    reversedImages.forEach(({ decade, img }, reversedIndex) => {
+    const reversedImages = [...imagesWithKeys].reverse();
+    reversedImages.forEach(({ key, img }, reversedIndex) => {
         // Calculate the original index to determine grid position
-        const index = imagesWithDecades.length - 1 - reversedIndex;
+        const index = imagesWithKeys.length - 1 - reversedIndex;
 
         const row = Math.floor(index / grid.cols);
         const col = index % grid.cols;
@@ -154,7 +160,7 @@ export async function createAlbumPage(imageData: Record<string, string>): Promis
         const captionAreaBottom = polaroidHeight / 2;
         const captionY = captionAreaTop + (captionAreaBottom - captionAreaTop) / 2;
 
-        ctx.fillText(decade, 0, captionY);
+        ctx.fillText(key, 0, captionY);
         
         ctx.restore(); // Restore context to pre-transformation state
     });
