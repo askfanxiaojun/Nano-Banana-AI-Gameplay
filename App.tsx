@@ -20,6 +20,7 @@ interface Mode {
   prompt?: string; // For single-image modes
   prompts?: Record<string, string>; // For multi-image modes
   previewClass: string; // Tailwind class for the card's background
+  previewImage: string;
 }
 
 const MODES: Mode[] = [
@@ -33,6 +34,7 @@ const MODES: Mode[] = [
             return acc;
         }, {} as Record<string, string>),
         previewClass: 'bg-gradient-to-br from-purple-500 to-indigo-600',
+        previewImage: 'https://pic1.imgdb.cn/item/68bab34258cb8da5c880bda7.png',
     },
     {
         id: 'portrait-art',
@@ -41,6 +43,7 @@ const MODES: Mode[] = [
         type: 'single-image',
         prompt: `结合上传的图片，创作一张高分辨率的黑白肖像艺术作品，采用编辑类和艺术摄影风格。背景呈现柔和渐变效果，从中灰过渡到近乎纯白，营造出层次感与寂静氛围。细腻的胶片颗粒质感为画面增添了一种可触摸的、模拟摄影般的柔和质地，让人联想到经典的黑白摄影。画面右侧，一个基于上传图片的模糊却惊艳的面容从阴影中隐约浮现，并非传统的摆拍，而像是被捕捉于思索或呼吸之间的瞬间。他/她的脸部只露出一部分：也许是一个眼睛、一块颧骨，还有唇角的轮廓，唤起神秘、亲密与优雅之感。他/她的五官精致而深刻，散发出忧郁与诗意之美，却不显矫饰。一束温柔的定向光，柔和地漫射开来，轻抚他/她的面颊曲线，或在眼中闪现光点——这是画面的情感核心。其余部分以大量负空间占据，刻意保持简洁，使画面自由呼吸。画面中没有文字、没有标志——只有光影与情绪交织。整体氛围抽象却深具人性，仿佛一瞥即逝的目光，或半梦-半醒间的记忆：亲密、永恒、令人怅然的美。`,
         previewClass: 'bg-gradient-to-br from-neutral-400 to-neutral-700',
+        previewImage: 'https://pic1.imgdb.cn/item/68bab4d558cb8da5c880cb36.png',
     },
     {
         id: 'knitted-doll',
@@ -49,6 +52,7 @@ const MODES: Mode[] = [
         type: 'single-image',
         prompt: `一张特写、构图专业的照片，展示一个手工钩织的毛线玩偶被双手轻柔地托着。玩偶造型圆润，是上传图片中人物的可爱Q版形象，色彩对比鲜明，细节丰富。持玩偶的双手自然、温柔，手指姿态清晰可见，皮肤质感与光影过渡自然，展现出温暖且真实的触感。背景轻微虚化，表现为室内环境，有温暖的木质桌面和从窗户洒入的自然光，营造出舒适、亲密的氛围。整体画面传达出精湛的工艺感与被珍视的温馨情绪。`,
         previewClass: 'bg-gradient-to-br from-pink-400 to-orange-400',
+        previewImage: 'https://pic1.imgdb.cn/item/68bab49a58cb8da5c880c9a3.png',
     },
     {
         id: 'davinci-sketch',
@@ -57,6 +61,7 @@ const MODES: Mode[] = [
         type: 'single-image',
         prompt: `将这张图转换成达芬奇手绘稿风格。`,
         previewClass: 'bg-gradient-to-br from-amber-200 to-yellow-800',
+        previewImage: 'https://pic1.imgdb.cn/item/68bab41258cb8da5c880c5e2.png',
     },
     {
         id: 'double-exposure',
@@ -65,6 +70,7 @@ const MODES: Mode[] = [
         type: 'single-image',
         prompt: `根据上传的图片中的人物主体生成图片：提取人物的形象，只需要展示人物侧脸，人物的侧脸与城市印象剪影轮廓进行多重曝光，黑白淡彩，完美重叠融合，人物之外的区域用纯白展示，整体情绪充满氛围感和艺术感，带有一定的胶片颗粒感，手签，胶片颗粒感，Ozanculha风，超现实主义，绝妙意境，高级感，杰作。`,
         previewClass: 'bg-gradient-to-br from-slate-700 to-cyan-200',
+        previewImage: 'https://pic1.imgdb.cn/item/68bab43c58cb8da5c880c716.png',
     },
     {
         id: 'black-gold',
@@ -73,6 +79,7 @@ const MODES: Mode[] = [
         type: 'single-image',
         prompt: `根据上传的图片中的人物主体生成图片：画面以纯黑为背景，采用侧面构图，用艺术感与神秘感兼具的风格，展现出人物形象的剪影。头发在侧前方光线的照射下，发丝隐隐约约。人物姿态安静，微微低头，脸部线条柔和流畅。画质细腻，呈现高对比度效果，画面色彩只有黑色背景和暖色调的剪影部分。侧前方的光线形成鲜明的明暗对比，塑造出立体的轮廓，镜头以平视角度与人物保持一定距离，捕捉这一剪影形象，带来沉静而引人遐想的视觉感受。`,
         previewClass: 'bg-gradient-to-br from-neutral-900 to-amber-500',
+        previewImage: 'https://pic1.imgdb.cn/item/68bab42f58cb8da5c880c6b8.png',
     }
 ];
 
@@ -281,22 +288,30 @@ function App() {
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
                         <h1 className="text-6xl md:text-8xl font-caveat font-bold text-neutral-100">AI 创意工坊</h1>
                         <p className="font-permanent-marker text-neutral-300 mt-2 text-xl tracking-wide">选择一个玩法，释放你的想象力。</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 max-w-4xl">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12 max-w-6xl">
                             {MODES.map((mode, index) => (
                                 <motion.div
                                     key={mode.id}
                                     initial={{ opacity: 0, y: 50 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.1, type: 'spring', stiffness: 100 }}
-                                    whileHover={{ scale: 1.03, y: -5 }}
-                                    className={`p-6 rounded-lg shadow-lg cursor-pointer text-left flex flex-col justify-between h-48 ${mode.previewClass}`}
+                                    whileHover={{ y: -5 }}
+                                    className="rounded-lg shadow-lg cursor-pointer text-left h-64 overflow-hidden relative group"
                                     onClick={() => handleModeSelect(mode)}
                                 >
-                                    <div>
-                                        <h2 className="text-3xl font-permanent-marker text-white">{mode.title}</h2>
-                                        <p className="text-white/80 mt-2">{mode.description}</p>
+                                    <img 
+                                        src={mode.previewImage} 
+                                        alt={mode.title} 
+                                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                                    <div className="relative p-6 flex flex-col justify-between h-full">
+                                        <div>
+                                            <h2 className="text-3xl font-permanent-marker bg-gradient-to-br from-white to-neutral-300 bg-clip-text text-transparent drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">{mode.title}</h2>
+                                            <p className="text-white/90 mt-2 drop-shadow-[0_1px_2px_rgba(0,0,0,1)]">{mode.description}</p>
+                                        </div>
+                                        <span className="text-white font-bold self-end text-2xl transition-transform duration-300 group-hover:translate-x-2 drop-shadow-[0_1px_2px_rgba(0,0,0,1)]">→</span>
                                     </div>
-                                    <span className="text-white font-bold self-end">→</span>
                                 </motion.div>
                             ))}
                         </div>
